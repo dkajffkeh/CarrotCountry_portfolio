@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="shMarketBoardAjaxSelector">
+SELECT *
+FROM(
+SELECT
+      ROWNUM RNUM
+      ,A.*
+FROM      
+(SELECT
+         POST_NO 
+        ,MEM_NO
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,POST_NAME
+        ,CATEGORY_NAME
+        ,THUMBNAIL_PATH
+        ,THUMBNAIL_FILENAME
+        ,THUMBNAIL_LOADPATH
+        ,POST_VIEWS
+        ,POST_LIKES
+        ,PROD_PRICE
+  FROM 
+      POST
+  JOIN 
+      LOCATION USING(LOCAL_NO)
+  WHERE 
+  	   BLIND_CHECK='N'
+  	AND
+  	   PROD_STATUS='Y'
+    AND
+       POST_TYPE=1	   	   
+  ORDER BY POST_VIEWS DESC)
+       A
+)
+WHERE RNUM BETWEEN 1 AND 8
+</entry>
+</properties>

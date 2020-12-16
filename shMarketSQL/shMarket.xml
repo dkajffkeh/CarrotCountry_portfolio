@@ -1,0 +1,914 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="CategorySelector">
+SELECT 
+	  CATEGORY_NAME 
+FROM 
+      CATEGORY
+ORDER BY CATEGORY_NO      
+</entry>
+<entry key="MainArticleSelector"> 
+SELECT *
+FROM(
+SELECT
+      ROWNUM RNUM
+      ,A.*
+FROM      
+(SELECT
+         POST_NO 
+        ,MEM_NO
+        ,LOCAL_SI || LOCAL_GU LOCATION
+        ,POST_NAME
+        ,CATEGORY_NAME
+        ,THUMBNAIL_PATH
+        ,THUMBNAIL_FILENAME
+        ,THUMBNAIL_LOADPATH
+        ,POST_VIEWS
+        ,POST_LIKES
+        ,PROD_PRICE
+  FROM 
+      POST
+  JOIN 
+      LOCATION USING(LOCAL_NO)
+  WHERE 
+  	   BLIND_CHECK='N'
+  	AND
+  	   PROD_STATUS='Y'
+    AND
+       POST_TYPE=1	   	   
+  ORDER BY POST_NO DESC)
+       A
+)
+WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="increaseBoardViews">
+UPDATE
+      POST
+   SET
+      POST_VIEWS=POST_VIEWS+1
+WHERE 
+	  POST_NO = ?
+</entry>
+<entry key="selectListCount">
+SELECT 
+      COUNT(POST_NO) BOARD_COUNT
+  FROM 
+      POST
+ WHERE
+      BLIND_CHECK='N'
+ AND 
+      PROD_STATUS='Y'
+ AND          
+      POST_TYPE=1 
+</entry>
+<entry key="PostBoardDetailSelector">
+	SELECT
+         POST_NO
+        ,CATEGORY_NO               
+        ,MEM_NO                      
+        ,LOCAL_SI||LOCAL_GU LOCATION 
+        ,MEM_NICKNAME                  
+        ,POST_NAME  
+        ,POST_COMMENT   
+        ,CATEGORY_NAME   
+        ,PROD_STATUS
+        ,DEAL_TYPE
+        ,SITE
+        ,THUMBNAIL_PATH
+        ,THUMBNAIL_FILENAME
+        ,THUMBNAIL_LOADPATH
+        ,POST_VIEWS
+        ,POST_LIKES
+        ,PROD_PRICE
+        ,POST_ENROLL_DATE       
+	 FROM
+         POST P
+	 JOIN 
+		 LOCATION USING(LOCAL_NO)
+	WHERE 
+	     BLIND_CHECK='N'
+	  AND 
+		 POST_NO = ?	  	 		 
+</entry>
+<entry key="marketCommentSelector">
+ SELECT 
+        COMM_NO
+       ,USER_NICKNAME
+       ,ENT_DATE
+       ,CONTENT
+       ,PRIVATE
+       ,POST_NO
+       ,MEM_NO
+       
+   FROM
+       POST_COMMENT
+   JOIN 
+  	   MEMBER USING(MEM_NO)
+  WHERE 
+       POST_NO =?
+  ORDER BY COMM_NO DESC     
+</entry>
+<entry key="shBoardInsertComment">
+	INSERT INTO
+        POST_COMMENT
+       (
+         COMM_NO
+        ,USER_NICKNAME
+        ,ENT_DATE
+        ,CONTENT
+        ,PRIVATE
+        ,POST_NO
+        ,MEM_NO
+       )
+       VALUES
+       (
+       SEQ_CNO.NEXTVAL
+       ,?
+       ,SYSDATE
+       ,?
+       ,?
+       ,?
+       ,?
+       )
+</entry>	
+<entry key="shMarketBoardInsert">
+INSERT INTO 
+          POST
+           (
+             POST_NO
+            ,CATEGORY_NO
+            ,MEM_NO
+            ,LOCAL_NO
+            ,MEM_NICKNAME
+            ,POST_NAME
+            ,POST_COMMENT            
+            ,CATEGORY_NAME          
+            ,PARCEL_NUM
+            ,PROD_STATUS
+            ,DEAL_TYPE
+            ,SITE
+            ,THUMBNAIL_PATH
+            ,THUMBNAIL_FILENAME
+            ,THUMBNAIL_LOADPATH
+            ,POST_VIEWS
+            ,POST_REPORTS
+            ,POST_LIKES
+            ,PROD_PRICE
+            ,POST_ENROLL_DATE
+            ,BLIND_CHECK
+            ,POST_TYPE
+           )
+           VALUES
+           (
+           SEQ_PNO.NEXTVAL
+          ,?
+          ,?
+          ,(
+                SELECT
+                      LOCAL_NO
+                  FROM 
+                      LOCATION
+                 WHERE 
+                      LOCAL_SI=?
+                   AND   
+                      LOCAL_GU=?
+                   AND   
+                      LOCAL_DONG=?
+           )
+          ,?
+          ,?
+          ,?
+          ,(SELECT 
+                 CATEGORY_NAME
+             FROM
+                 CATEGORY
+           WHERE CATEGORY_NO=?)
+          ,'ABC'
+          ,DEFAULT
+          ,'D'
+          ,'서울'
+          ,?
+          ,?
+          ,?
+          ,DEFAULT
+          ,DEFAULT
+          ,DEFAULT
+          ,?
+          ,SYSDATE
+          ,DEFAULT
+          ,1
+           )
+</entry>
+<entry key="shMarketPhotoInsert">
+INSERT INTO
+           PHOTO
+           (
+             PHOTO_NO
+            ,POST_NO
+            ,PHOTO_PATH
+            ,PHOTO_FILENAME
+            ,PHOTO_LOADPATH
+           )
+           VALUES
+           (
+           SEQ_IMGNO.NEXTVAL
+          ,SEQ_PNO.CURRVAL
+          ,?
+          ,?
+          ,?
+           )
+</entry>
+<entry key="shMarketBordConditionInsert">
+INSERT INTO
+           USEDPROD
+           (
+            POST_NO
+           ,DEAL_STATUS
+           ,USED_PRODSTATUS
+           ,USED_PRICE
+           
+           )
+      VALUES
+           (
+            SEQ_PNO.CURRVAL
+           ,DEFAULT
+           ,?
+           ,?  
+           
+           )
+</entry>
+<entry key="shMarketBoardCommentSelector">
+SELECT *
+FROM(     
+SELECT 
+      ROWNUM RNUM
+     ,A.*
+FROM     
+(SELECT 
+      COMM_NO
+      ,USER_NICKNAME
+      ,ENT_DATE
+      ,CONTENT
+      ,PRIVATE
+      ,POST_NO
+      ,MEM_NO
+  FROM 
+      POST_COMMENT
+WHERE
+     MEM_NO=?
+ORDER BY COMM_NO DESC
+		  )
+		  A
+		  )
+WHERE RNUM =1
+</entry>
+<entry key="townMarketDeleteForm">
+UPDATE 
+      POST
+SET 
+      BLIND_CHECK='Y'
+WHERE 
+      POST_NO=?
+</entry>
+<entry key="shMarketPhotoSelector">
+SELECT 
+       PHOTO_PATH
+      ,PHOTO_FILENAME
+  FROM 
+      PHOTO  
+ WHERE
+      POST_NO=?
+</entry>
+<entry key="postStatusUpdate">
+UPDATE 
+      POST
+   SET 
+      PROD_STATUS='N'
+ WHERE 
+      POST_NO=?
+   AND 
+      BLIND_CHECK='N'
+</entry>
+<entry key="dibsCheck"> 
+SELECT
+      COUNT(MEM_NO) COUNT
+ FROM
+      LIKE_POST
+WHERE 
+      MEM_NO = ?
+AND 
+      POST_NO = ?
+</entry>
+<entry key="insertLike">
+INSERT INTO
+          LIKE_POST
+          (
+           MEM_NO
+          ,POST_NO
+          )
+          VALUES
+          (
+          ?
+         ,?
+          )
+</entry>
+<entry key="likeCountSelector">
+SELECT *
+FROM(
+SELECT ROWNUM RNUM
+      ,A.*
+FROM
+(  
+SELECT
+        COUNT(LP.POST_NO) LIKECOUNT
+  FROM 
+      POST P
+LEFT JOIN 
+    LIKE_POST LP ON(P.POST_NO=LP.POST_NO)
+WHERE 
+  	   BLIND_CHECK='N'
+  	AND
+  	   PROD_STATUS='Y'
+GROUP BY P.POST_NO
+ORDER BY P.POST_NO DESC
+)A)
+WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="insertPostBoardLike">
+UPDATE
+      POST
+SET 
+      POST_LIKES=POST_LIKES+1
+WHERE 
+      POST_NO=?
+</entry>
+
+<entry key="shMarketCommentUpdate">
+UPDATE
+      POST_COMMENT
+   SET    
+      CONTENT=?
+ WHERE
+      COMM_NO=?
+</entry>
+<entry key="shMarketCommentReSelector">
+SELECT
+       COMM_NO
+      ,USER_NICKNAME
+      ,ENT_DATE
+      ,CONTENT
+      ,PRIVATE
+      ,MEM_NO
+  FROM
+      POST_COMMENT
+ WHERE
+      COMM_NO=?
+</entry>
+<entry key="shMarketcommentDelete">
+DELETE 
+      FROM
+           POST_COMMENT
+WHERE COMM_NO=? 
+</entry>
+<entry key="shMarketBoardModify">
+	UPDATE
+      POST
+   SET
+      CATEGORY_NO=?
+     ,LOCAL_NO=(
+                SELECT
+                      LOCAL_NO
+                  FROM 
+                      LOCATION
+                 WHERE 
+                      LOCAL_SI=?
+                   AND   
+                      LOCAL_GU=?
+                   AND   
+                      LOCAL_DONG=?
+                )
+      ,POST_NAME=?
+      ,POST_COMMENT=?
+      ,CATEGORY_NAME=(
+			           SELECT 
+			                 CATEGORY_NAME
+			             FROM
+			                 CATEGORY
+			            WHERE 
+			                 CATEGORY_NO=?
+                    )
+       ,PROD_PRICE=?
+	WHERE 
+         POST_NO=?
+      AND
+         BLIND_CHECK='N'
+      AND
+         PROD_STATUS='Y'        
+</entry>
+<entry key="shMarketUsedProdModify">
+UPDATE
+      USEDPROD
+   SET
+      USED_PRODSTATUS=?
+     ,USED_PRICE=?
+WHERE 
+     POST_NO=?
+</entry>
+<entry key="shMarketBoardAndPhotoModify">
+UPDATE
+      POST
+   SET
+      CATEGORY_NO=?
+     ,LOCAL_NO=(
+                SELECT
+                      LOCAL_NO
+                  FROM 
+                      LOCATION
+                 WHERE 
+                      LOCAL_SI=?
+                   AND   
+                      LOCAL_GU=?
+                   AND   
+                      LOCAL_DONG=?
+                )
+      ,POST_NAME=?
+      ,POST_COMMENT=?
+      ,CATEGORY_NAME=(
+			           SELECT 
+			                 CATEGORY_NAME
+			             FROM
+			                 CATEGORY
+			            WHERE 
+			                 CATEGORY_NO=?
+                    )
+       ,THUMBNAIL_PATH=?
+       ,THUMBNAIL_FILENAME=?
+       ,THUMBNAIL_LOADPATH=?            
+       ,PROD_PRICE=?
+	WHERE 
+         POST_NO=?
+      AND
+         BLIND_CHECK='N'
+      AND
+         PROD_STATUS='Y' 
+</entry>
+<entry key="shMarketPhotoDelete">
+  DELETE
+  FROM 
+       PHOTO
+  WHERE POST_NO=?
+</entry>
+<entry key="shMarketPhotoUpdate">
+INSERT INTO
+           PHOTO
+           (
+       PHOTO_NO
+      ,POST_NO
+      ,PHOTO_PATH
+      ,PHOTO_FILENAME
+      ,PHOTO_LOADPATH    
+            )
+        VALUES
+        (
+        SEQ_PNO.NEXTVAL
+       ,?
+       ,?
+       ,?
+       ,?
+        )
+</entry>
+<entry key="shMarketReportCategorySelector">
+SELECT
+	   REPORT_REASON_NO
+      ,REPORT_REASON
+  FROM
+      REPORT_REASON
+</entry>
+<entry key="reportPreCheck">
+SELECT
+      COUNT(*)
+  FROM
+       REPORT
+WHERE
+     MEM_NO=?
+AND
+     REPORT_POST_NO=?
+</entry>
+<entry key="shMarketReportInsert">
+INSERT INTO
+           REPORT
+           (
+             REPORT_NO
+            ,MEM_NO
+            ,REPORT_TYPE_NO
+            ,REPORT_REASON_NO
+            ,REPORT_DATE
+            ,REPORT_POST_NO
+            ,REPORT_CHECK
+            ,REPORT_CONTENT
+           )
+           VALUES
+           (
+           SEQ_REPORTNO.NEXTVAL
+          ,?
+          ,1
+          ,?
+          ,SYSDATE
+          ,?
+          ,DEFAULT
+          ,?
+           )
+</entry>
+<entry key="shMarketLocationSelector">
+SELECT
+       LOCAL_SI
+      ,LOCAL_GU
+      ,LOCAL_DONG
+  FROM
+      LOCATION L
+JOIN POST P  USING(LOCAL_NO)
+WHERE P.POST_NO=?
+</entry>
+<entry key="shMarketCommentModifier">
+UPDATE
+      POST_COMMENT
+   SET
+      CONTENT=?
+WHERE
+      COMM_NO=?
+</entry>
+<entry key="shMarketCommentReportPrecheck">
+SELECT
+      COUNT(*) COUNT
+ FROM
+      REPORT
+WHERE 
+     MEM_NO=?
+AND
+     REPORT_POST_NO=?
+AND  
+     REPORT_TYPE_NO=3
+</entry>
+<entry key="shMarketCommentReportInsert">
+INSERT INTO
+           REPORT
+           (
+             REPORT_NO
+            ,MEM_NO
+            ,REPORT_TYPE_NO
+            ,REPORT_REASON_NO
+            ,REPORT_DATE
+            ,REPORT_POST_NO
+            ,REPORT_CHECK
+            ,REPORT_CONTENT
+           )
+           VALUES
+           (
+           SEQ_REPORTNO.NEXTVAL
+          ,?
+          ,3
+          ,?
+          ,SYSDATE
+          ,?
+          ,DEFAULT
+          ,?
+           ) 
+</entry>
+<entry key="townMarketAjaxBoardSelector">
+SELECT *
+FROM
+(
+SELECT  ROWNUM RNUM
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,A.*
+FROM      
+(
+SELECT POST_NO
+      ,LIKECOUNT
+      ,MEM_NO
+      ,LOCAL_NO
+      ,POST_NAME
+      ,CATEGORY_NAME
+      ,THUMBNAIL_PATH
+      ,THUMBNAIL_FILENAME
+      ,THUMBNAIL_LOADPATH
+      ,POST_VIEWS
+      ,POST_LIKES
+      ,PROD_PRICE
+      ,PROD_STATUS
+      ,BLIND_CHECK
+      ,POST_TYPE
+FROM
+(
+SELECT 
+       P.POST_NO
+      ,COUNT(L.POST_NO) LIKECOUNT
+ FROM     
+      LIKE_POST L
+ RIGHT JOIN POST P ON(P.POST_NO=L.POST_NO)
+ GROUP BY P.POST_NO
+)
+JOIN POST USING (POST_NO)
+WHERE
+     PROD_STATUS = 'Y'
+  AND
+     BLIND_CHECK = 'N'
+  AND
+     POST_TYPE=1
+ORDER BY POST_NO DESC)
+         A
+JOIN LOCATION L ON(A.LOCAL_NO=L.LOCAL_NO)
+)
+WHERE RNUM BETWEEN ? AND ?
+</entry>
+
+<entry key="TownMarketBoardAjaxCategorySelector">
+SELECT *
+FROM
+(
+SELECT  ROWNUM RNUM
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,A.*
+FROM      
+(
+SELECT POST_NO
+      ,LIKECOUNT
+      ,MEM_NO
+      ,LOCAL_NO
+      ,POST_NAME
+      ,CATEGORY_NAME
+      ,THUMBNAIL_PATH
+      ,THUMBNAIL_FILENAME
+      ,THUMBNAIL_LOADPATH
+      ,POST_VIEWS
+      ,POST_LIKES
+      ,PROD_PRICE
+      ,PROD_STATUS
+      ,BLIND_CHECK
+      ,POST_TYPE
+FROM
+(
+SELECT 
+       P.POST_NO
+      ,COUNT(L.POST_NO) LIKECOUNT
+ FROM     
+      LIKE_POST L
+ RIGHT JOIN POST P ON(P.POST_NO=L.POST_NO)
+ GROUP BY P.POST_NO
+)
+JOIN POST USING (POST_NO)
+WHERE
+     PROD_STATUS = 'Y'
+  AND
+     BLIND_CHECK = 'N'
+  AND
+     POST_TYPE=1
+  
+ORDER BY POST_NO DESC)
+         A
+JOIN LOCATION L ON(A.LOCAL_NO=L.LOCAL_NO)
+)
+WHERE RNUM BETWEEN ? AND ?
+AND CATEGORY_NAME LIKE ?
+</entry>
+<entry key="townMarketAjaxUserSearchMain">
+SELECT *
+FROM
+(
+SELECT  ROWNUM RNUM
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,A.*
+FROM      
+(
+SELECT POST_NO
+      ,LIKECOUNT
+      ,MEM_NO
+      ,LOCAL_NO
+      ,POST_NAME
+      ,CATEGORY_NAME
+      ,THUMBNAIL_PATH
+      ,THUMBNAIL_FILENAME
+      ,THUMBNAIL_LOADPATH
+      ,POST_VIEWS
+      ,POST_LIKES
+      ,PROD_PRICE
+      ,PROD_STATUS
+      ,BLIND_CHECK
+      ,POST_TYPE
+FROM
+(
+SELECT 
+       P.POST_NO
+      ,COUNT(L.POST_NO) LIKECOUNT
+ FROM     
+      LIKE_POST L
+ RIGHT JOIN POST P ON(P.POST_NO=L.POST_NO)
+ GROUP BY P.POST_NO
+)
+JOIN POST USING (POST_NO)
+WHERE
+     PROD_STATUS = 'Y'
+  AND
+     BLIND_CHECK = 'N'
+  AND
+     POST_TYPE=1
+ORDER BY POST_NO DESC)
+         A
+JOIN LOCATION L ON(A.LOCAL_NO=L.LOCAL_NO)
+)
+WHERE RNUM BETWEEN ? AND ?
+AND POST_NAME LIKE ?
+AND CATEGORY_NAME LIKE ?
+AND LOCATION LIKE ?
+</entry>
+<entry key="townMarketAjaxSorter1">
+SELECT *
+FROM
+(
+SELECT  ROWNUM RNUM
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,A.*
+FROM      
+(
+SELECT POST_NO
+      ,LIKECOUNT
+      ,MEM_NO
+      ,LOCAL_NO
+      ,POST_NAME
+      ,CATEGORY_NAME
+      ,THUMBNAIL_PATH
+      ,THUMBNAIL_FILENAME
+      ,THUMBNAIL_LOADPATH
+      ,POST_VIEWS
+      ,POST_LIKES
+      ,PROD_PRICE
+      ,PROD_STATUS
+      ,BLIND_CHECK
+      ,POST_TYPE
+FROM
+(
+SELECT 
+       P.POST_NO
+      ,COUNT(L.POST_NO) LIKECOUNT
+ FROM     
+      LIKE_POST L
+ RIGHT JOIN POST P ON(P.POST_NO=L.POST_NO)
+ GROUP BY P.POST_NO
+)
+JOIN POST USING (POST_NO)
+WHERE
+     PROD_STATUS = 'Y'
+  AND
+     BLIND_CHECK = 'N'
+  AND
+     POST_TYPE=1
+ORDER BY POST_NO DESC)
+         A
+JOIN LOCATION L ON(A.LOCAL_NO=L.LOCAL_NO)
+)
+WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="townMarketAjaxSorter2">
+SELECT *
+FROM
+(
+SELECT  ROWNUM RNUM
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,A.*
+FROM      
+(
+SELECT POST_NO
+      ,LIKECOUNT
+      ,MEM_NO
+      ,LOCAL_NO
+      ,POST_NAME
+      ,CATEGORY_NAME
+      ,THUMBNAIL_PATH
+      ,THUMBNAIL_FILENAME
+      ,THUMBNAIL_LOADPATH
+      ,POST_VIEWS
+      ,POST_LIKES
+      ,PROD_PRICE
+      ,PROD_STATUS
+      ,BLIND_CHECK
+      ,POST_TYPE
+FROM
+(
+SELECT 
+       P.POST_NO
+      ,COUNT(L.POST_NO) LIKECOUNT
+ FROM     
+      LIKE_POST L
+ RIGHT JOIN POST P ON(P.POST_NO=L.POST_NO)
+ GROUP BY P.POST_NO
+)
+JOIN POST USING (POST_NO)
+WHERE
+     PROD_STATUS = 'Y'
+  AND
+     BLIND_CHECK = 'N'
+  AND
+     POST_TYPE=1
+ORDER BY PROD_PRICE ASC)
+         A
+JOIN LOCATION L ON(A.LOCAL_NO=L.LOCAL_NO)
+)
+WHERE RNUM BETWEEN ? AND ?
+
+</entry>
+<entry key="townMarketAjaxSorter3">
+SELECT *
+FROM
+(
+SELECT  ROWNUM RNUM
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,A.*
+FROM      
+(
+SELECT POST_NO
+      ,LIKECOUNT
+      ,MEM_NO
+      ,LOCAL_NO
+      ,POST_NAME
+      ,CATEGORY_NAME
+      ,THUMBNAIL_PATH
+      ,THUMBNAIL_FILENAME
+      ,THUMBNAIL_LOADPATH
+      ,POST_VIEWS
+      ,POST_LIKES
+      ,PROD_PRICE
+      ,PROD_STATUS
+      ,BLIND_CHECK
+      ,POST_TYPE
+FROM
+(
+SELECT 
+       P.POST_NO
+      ,COUNT(L.POST_NO) LIKECOUNT
+ FROM     
+      LIKE_POST L
+ RIGHT JOIN POST P ON(P.POST_NO=L.POST_NO)
+ GROUP BY P.POST_NO
+)
+JOIN POST USING (POST_NO)
+WHERE
+     PROD_STATUS = 'Y'
+  AND
+     BLIND_CHECK = 'N'
+  AND
+     POST_TYPE=1
+ORDER BY POST_LIKES DESC)
+         A
+JOIN LOCATION L ON(A.LOCAL_NO=L.LOCAL_NO)
+)
+WHERE RNUM BETWEEN ? AND ?
+</entry>
+<entry key="townMarketAjaxSorter4">
+SELECT *
+FROM
+(
+SELECT  ROWNUM RNUM
+        ,LOCAL_GU ||' '|| LOCAL_DONG LOCATION
+        ,A.*
+FROM      
+(
+SELECT POST_NO
+      ,LIKECOUNT
+      ,MEM_NO
+      ,LOCAL_NO
+      ,POST_NAME
+      ,CATEGORY_NAME
+      ,THUMBNAIL_PATH
+      ,THUMBNAIL_FILENAME
+      ,THUMBNAIL_LOADPATH
+      ,POST_VIEWS
+      ,POST_LIKES
+      ,PROD_PRICE
+      ,PROD_STATUS
+      ,BLIND_CHECK
+      ,POST_TYPE
+FROM
+(
+SELECT 
+       P.POST_NO
+      ,COUNT(L.POST_NO) LIKECOUNT
+ FROM     
+      LIKE_POST L
+ RIGHT JOIN POST P ON(P.POST_NO=L.POST_NO)
+ GROUP BY P.POST_NO
+)
+JOIN POST USING (POST_NO)
+WHERE
+     PROD_STATUS = 'Y'
+  AND
+     BLIND_CHECK = 'N'
+  AND
+     POST_TYPE=1
+ORDER BY POST_VIEWS DESC)
+         A
+JOIN LOCATION L ON(A.LOCAL_NO=L.LOCAL_NO)
+)
+WHERE RNUM BETWEEN ? AND ?
+</entry>
+</properties>
